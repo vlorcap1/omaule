@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Observatorio Regional del Maule</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#070b14;--bg2:#0d1321;--card:#121a2e;--card2:#182035;--border:#1e2d4a;--t1:#e4e9f2;--t2:#8b9bc0;--t3:#536080;--blue:#4d8eff;--cyan:#22d3ee;--green:#34d399;--amber:#fbbf24;--rose:#fb7185;--violet:#a78bfa;--grad1:linear-gradient(135deg,#4d8eff,#22d3ee);--grad2:linear-gradient(135deg,#34d399,#22d3ee);--grad3:linear-gradient(135deg,#fbbf24,#fb7185);--grad4:linear-gradient(135deg,#a78bfa,#818cf8);--r:14px}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
+
+/* HEADER */
+.hdr{background:linear-gradient(180deg,rgba(77,142,255,.06),transparent);border-bottom:1px solid var(--border);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(24px)}
+.hdr-l{display:flex;align-items:center;gap:1rem}
+.logo{width:40px;height:40px;background:var(--grad1);border-radius:10px;display:grid;place-items:center;font-weight:700;font-size:.9rem;color:#fff;box-shadow:0 0 24px rgba(77,142,255,.25)}
+.hdr h1{font-family:'Instrument Serif',serif;font-size:1.3rem;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr p{font-size:.66rem;color:var(--t3)}
+.hdr-r{display:flex;align-items:center;gap:.5rem}
+.status{display:flex;align-items:center;gap:.4rem;font-size:.68rem;color:var(--t3);background:var(--card);padding:.38rem .6rem;border-radius:7px;border:1px solid var(--border)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pls 2s infinite}
+.dot.err{background:var(--rose);animation:none}
+@keyframes pls{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* MAIN TABS */
+.main-tabs{display:flex;gap:2px;background:var(--bg2);padding:4px 2rem;border-bottom:1px solid var(--border);position:sticky;top:55px;z-index:99;overflow-x:auto}
+.mtab{padding:.55rem 1.1rem;font-size:.76rem;font-weight:500;border:none;background:none;color:var(--t3);cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap;border-radius:8px 8px 0 0;position:relative;display:flex;align-items:center;gap:.4rem}
+.mtab:hover{color:var(--t1);background:rgba(77,142,255,.05)}
+.mtab.act{color:#fff;background:rgba(77,142,255,.12)}
+.mtab.act::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--grad1)}
+.tbdg{font-size:.52rem;padding:1px 5px;border-radius:3px;font-weight:600}
+.tbdg.lv{background:rgba(52,211,153,.15);color:var(--green)}
+.tbdg.ex{background:rgba(77,142,255,.15);color:var(--blue)}
+
+/* TAB CONTENT */
+.tc{display:none}.tc.active{display:block}
+.ifw{width:100%;height:calc(100vh - 110px);background:var(--bg2);position:relative}
+.ifw iframe{width:100%;height:100%;border:none;background:#fff}
+.ifld{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;color:var(--t2);font-size:.82rem;background:var(--bg2);z-index:2;transition:opacity .4s}
+.ifld.hid{opacity:0;pointer-events:none}
+.sp{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MAIN */
+.main{max-width:1400px;margin:0 auto;padding:1.4rem 2rem 3rem}
+.slbl{font-size:.66rem;text-transform:uppercase;letter-spacing:2px;color:var(--t3);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+.slbl::after{content:'';flex:1;height:1px;background:var(--border)}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem;margin-bottom:1.4rem}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.15rem;position:relative;overflow:hidden;transition:all .25s}
+.kpi:hover{border-color:rgba(77,142,255,.3);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.35)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi:nth-child(1)::before{background:var(--grad1)}.kpi:nth-child(2)::before{background:var(--grad2)}.kpi:nth-child(3)::before{background:var(--grad3)}.kpi:nth-child(4)::before{background:var(--grad4)}.kpi:nth-child(5)::before{background:linear-gradient(135deg,var(--cyan),var(--green))}
+.kl{font-size:.66rem;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:.3rem}
+.kv{font-family:'Instrument Serif',serif;font-size:1.65rem;letter-spacing:-1px;line-height:1.1}
+.kpi:nth-child(1) .kv{color:var(--blue)}.kpi:nth-child(2) .kv{color:var(--green)}.kpi:nth-child(3) .kv{color:var(--amber)}.kpi:nth-child(4) .kv{color:var(--violet)}.kpi:nth-child(5) .kv{color:var(--cyan)}
+.kc{font-size:.68rem;margin-top:.2rem}.kc .pos{color:var(--green)}.kc .neg{color:var(--rose)}
+.ks{font-size:.56rem;color:var(--t3);margin-top:.3rem;opacity:.6}
+.kld{background:linear-gradient(90deg,var(--card),var(--card2),var(--card));background-size:400px;animation:shm 1.4s infinite;height:1.65rem;width:75%;border-radius:4px;margin:3px 0}
+@keyframes shm{0%{background-position:-200px 0}100%{background-position:200px 0}}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem}
+.g23{display:grid;grid-template-columns:2fr 1fr;gap:.8rem;margin-bottom:.8rem}
+.pnl{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.15rem 1.2rem;transition:border-color .3s}
+.pnl:hover{border-color:rgba(77,142,255,.15)}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
+.pt{font-size:.82rem;font-weight:700}
+.bdg{font-size:.56rem;padding:.18rem .42rem;border-radius:4px;font-weight:600}
+.ba{background:rgba(77,142,255,.12);color:var(--blue)}.bi{background:rgba(52,211,153,.12);color:var(--green)}.bb{background:rgba(167,139,250,.12);color:var(--violet)}.bl{background:rgba(251,191,36,.12);color:var(--amber)}
+canvas{display:block;width:100%!important}
+.chw{position:relative;height:200px;width:100%}
+.chw.tall{height:220px}
+.chw.dn{height:240px}
+.tbl{width:100%;border-collapse:collapse;font-size:.74rem}
+.tbl th{text-align:left;padding:.48rem .55rem;color:var(--t3);font-weight:500;font-size:.64rem;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.tbl td{padding:.48rem .55rem;border-bottom:1px solid rgba(30,45,74,.4);color:var(--t2)}
+.tbl .v{color:var(--t1);font-weight:600}.tbl .pos{color:var(--green)}.tbl .neg{color:var(--rose)}
+.br{display:flex;align-items:center;gap:.6rem;margin-bottom:.45rem}
+.brl{min-width:90px;font-size:.71rem;color:var(--t2);text-align:right}
+.brt{flex:1;height:20px;background:rgba(77,142,255,.05);border-radius:4px;overflow:hidden}
+.brf{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:7px;font-size:.62rem;font-weight:600;color:#fff;transition:width 1.2s ease}
+.brf.b1{background:var(--grad1)}.brf.b2{background:var(--grad2)}.brf.b3{background:var(--grad3)}.brf.b4{background:var(--grad4)}
+.tabs{display:flex;gap:3px;margin-bottom:.75rem;background:var(--bg2);padding:3px;border-radius:8px;width:fit-content}
+.tab{padding:.28rem .55rem;font-size:.66rem;border-radius:6px;cursor:pointer;color:var(--t3);transition:all .2s;border:none;background:none;font-family:inherit}
+.tab.act{background:var(--blue);color:#fff}
+.cg{display:grid;grid-template-columns:repeat(5,1fr);gap:.32rem}
+.ci{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:.42rem .5rem;font-size:.64rem;color:var(--t2);text-align:center}.ci:hover{border-color:var(--blue);color:var(--t1)}
+.cv{font-weight:700;color:var(--t1);margin-top:2px;font-size:.7rem}
+.ms{display:flex;align-items:center;gap:.65rem;padding:.5rem 0;border-bottom:1px solid rgba(30,45,74,.3)}.ms:last-child{border-bottom:none}
+.mi{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-size:.9rem;flex-shrink:0}
+.mn{font-size:.73rem;color:var(--t1)}.mv{font-size:.64rem;color:var(--t3)}
+.ftr{text-align:center;padding:1.2rem;color:var(--t3);font-size:.6rem;border-top:1px solid var(--border)}.ftr a{color:var(--blue);text-decoration:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}.anim{animation:fadeUp .4s ease forwards;opacity:0}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.g2,.g23{grid-template-columns:1fr}.cg{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.kpis{grid-template-columns:1fr}.hdr{flex-direction:column;gap:.6rem;align-items:flex-start}.main{padding:1rem}.cg{grid-template-columns:repeat(2,1fr)}.main-tabs{padding:4px .5rem}.mtab{padding:.45rem .6rem;font-size:.7rem}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-l"><div class="logo">VII</div><div><h1>Observatorio Región del Maule</h1><p>Indicadores económicos · Proyectos regionales · Datos en vivo</p></div></div>
+  <div class="hdr-r"><span style="font-size:.6rem;color:var(--t3)" id="upd"></span><div class="status"><div class="dot" id="sDot"></div><span id="sTxt">Conectando...</span></div></div>
+</header>
+
+<nav class="main-tabs">
+  <button class="mtab act" onclick="sw('obs',this)">📊 Observatorio <span class="tbdg lv">LIVE</span></button>
+  <button class="mtab" onclick="sw('mop',this)">🏗️ Proyectos MOP <span class="tbdg ex">EXT</span></button>
+  <button class="mtab" onclick="sw('serviu',this)">🏘️ SERVIU Maule <span class="tbdg ex">EXT</span></button>
+  <button class="mtab" onclick="sw('corfo',this)">💼 Análisis CORFO <span class="tbdg ex">EXT</span></button>
+  <button class="mtab" onclick="sw('dga',this)">💧 DGA Aguas <span class="tbdg lv">361</span></button>
+</nav>
+
+<!-- ════ OBSERVATORIO ════ -->
+<div class="tc active" id="t-obs">
+<main class="main">
+<div class="slbl anim">Indicadores Nacionales — mindicador.cl</div>
+<div class="kpis">
+  <div class="kpi anim" style="animation-delay:.04s"><div class="kl">💵 Dólar</div><div class="kv" id="kD"><div class="kld"></div></div><div class="kc" id="kDc"></div><div class="ks">mindicador.cl</div></div>
+  <div class="kpi anim" style="animation-delay:.08s"><div class="kl">🏠 UF</div><div class="kv" id="kU"><div class="kld"></div></div><div class="kc" id="kUc"></div><div class="ks">mindicador.cl</div></div>
+  <div class="kpi anim" style="animation-delay:.12s"><div class="kl">🇪🇺 Euro</div><div class="kv" id="kE"><div class="kld"></div></div><div class="kc" id="kEc"></div><div class="ks">mindicador.cl</div></div>
+  <div class="kpi anim" style="animation-delay:.16s"><div class="kl">📊 IPC</div><div class="kv" id="kI"><div class="kld"></div></div><div class="kc" id="kIc"></div><div class="ks">INE</div></div>
+  <div class="kpi anim" style="animation-delay:.2s"><div class="kl">📈 IMACEC</div><div class="kv" id="kM"><div class="kld"></div></div><div class="kc" id="kMc"></div><div class="ks">BCCh</div></div>
+</div>
+
+<div class="slbl anim" style="animation-delay:.22s">Series Históricas</div>
+<div class="g2 anim" style="animation-delay:.24s">
+  <div class="pnl"><div class="ph"><span class="pt">Dólar Observado</span><span class="bdg ba">LIVE</span></div><div class="chw"><canvas id="cD"></canvas></div></div>
+  <div class="pnl"><div class="ph"><span class="pt">UF</span><span class="bdg ba">LIVE</span></div><div class="chw"><canvas id="cU"></canvas></div></div>
+</div>
+<div class="g2 anim" style="animation-delay:.26s">
+  <div class="pnl"><div class="ph"><span class="pt">IPC — Var. Mensual</span><span class="bdg bi">INE</span></div><div class="chw"><canvas id="cI"></canvas></div></div>
+  <div class="pnl"><div class="ph"><span class="pt">IMACEC</span><span class="bdg bb">BCCh</span></div><div class="chw"><canvas id="cM"></canvas></div></div>
+</div>
+
+<div class="slbl anim" style="animation-delay:.28s">Región del Maule</div>
+<div class="g23 anim" style="animation-delay:.3s">
+  <div class="pnl"><div class="ph"><span class="pt">PIB Regional — Var. Anual %</span><span class="bdg bb">BCCh</span></div><div class="chw tall"><canvas id="cPib"></canvas></div></div>
+  <div class="pnl"><div class="ph"><span class="pt">Ficha Regional</span><span class="bdg bi">INE</span></div>
+    <div class="ms"><div class="mi" style="background:rgba(77,142,255,.1)">👥</div><div><div class="mn">Población</div><div class="mv">1.131.939 hab. (2024)</div></div></div>
+    <div class="ms"><div class="mi" style="background:rgba(52,211,153,.1)">📊</div><div><div class="mn">PIB 2024</div><div class="mv">+5,2% anual</div></div></div>
+    <div class="ms"><div class="mi" style="background:rgba(251,191,36,.1)">💼</div><div><div class="mn">Desempleo</div><div class="mv">7,2% (ENE)</div></div></div>
+    <div class="ms"><div class="mi" style="background:rgba(167,139,250,.1)">🏙️</div><div><div class="mn">Capital</div><div class="mv">Talca</div></div></div>
+    <div class="ms"><div class="mi" style="background:rgba(34,211,238,.1)">📐</div><div><div class="mn">Superficie</div><div class="mv">30.296 km²</div></div></div>
+    <div class="ms"><div class="mi" style="background:rgba(251,113,133,.1)">🍇</div><div><div class="mn">Actividades</div><div class="mv">Agropecuario, Vino, Frutícola</div></div></div>
+  </div>
+</div>
+<div class="g2 anim" style="animation-delay:.32s">
+  <div class="pnl"><div class="ph"><span class="pt">PIB por Sector 2024</span><span class="bdg bb">BCCh</span></div><div class="chw dn"><canvas id="cSec"></canvas></div></div>
+  <div class="pnl"><div class="ph"><span class="pt">Empleo por Rama</span><span class="bdg bi">ENE</span></div>
+    <div class="br"><span class="brl">Agropecuario</span><div class="brt"><div class="brf b2" style="width:28%">28%</div></div></div>
+    <div class="br"><span class="brl">Comercio</span><div class="brt"><div class="brf b1" style="width:18%">18%</div></div></div>
+    <div class="br"><span class="brl">Construcción</span><div class="brt"><div class="brf b3" style="width:11%">11%</div></div></div>
+    <div class="br"><span class="brl">Ind. Manufact.</span><div class="brt"><div class="brf b4" style="width:10%">10%</div></div></div>
+    <div class="br"><span class="brl">Transporte</span><div class="brt"><div class="brf b1" style="width:8%">8%</div></div></div>
+    <div class="br"><span class="brl">Enseñanza</span><div class="brt"><div class="brf b2" style="width:7%">7%</div></div></div>
+    <div class="br"><span class="brl">Otros</span><div class="brt"><div class="brf b4" style="width:18%">18%</div></div></div>
+  </div>
+</div>
+<div class="g23 anim" style="animation-delay:.34s">
+  <div class="pnl"><div class="ph"><span class="pt">Comunas por Provincia</span><span class="bdg bi">INE</span></div>
+    <div class="tabs"><button class="tab act" onclick="prov(this,'talca')">Talca</button><button class="tab" onclick="prov(this,'curico')">Curicó</button><button class="tab" onclick="prov(this,'linares')">Linares</button><button class="tab" onclick="prov(this,'cauquenes')">Cauquenes</button></div>
+    <div class="cg" id="cGrid"></div>
+  </div>
+  <div class="pnl"><div class="ph"><span class="pt">PIB Trimestral</span><span class="bdg bb">BCCh</span></div>
+    <table class="tbl"><thead><tr><th>Trim.</th><th>PIB</th><th>Cons.</th></tr></thead><tbody>
+      <tr><td>2024 Q4</td><td class="v pos">+14,2%</td><td class="v pos">+4,8%</td></tr>
+      <tr><td>2024 Q3</td><td class="v pos">+2,0%</td><td class="v pos">+0,8%</td></tr>
+      <tr><td>2024 Q2</td><td class="v pos">+0,5%</td><td class="v pos">+0,7%</td></tr>
+      <tr><td>2024 Q1</td><td class="v pos">+4,6%</td><td class="v pos">+0,9%</td></tr>
+      <tr><td>2023 Q4</td><td class="v pos">+2,1%</td><td class="v neg">-2,7%</td></tr>
+      <tr><td>2023 Q3</td><td class="v pos">+1,5%</td><td class="v neg">-5,8%</td></tr>
+      <tr><td>2023 Q2</td><td class="v neg">-0,8%</td><td class="v neg">-6,8%</td></tr>
+    </tbody></table>
+  </div>
+</div>
+<div class="slbl anim" style="animation-delay:.36s">Indicadores Adicionales</div>
+<div class="g2 anim" style="animation-delay:.38s">
+  <div class="pnl"><div class="ph"><span class="pt">Desempleo Nacional</span><span class="bdg ba">LIVE</span></div><div class="chw"><canvas id="cDes"></canvas></div></div>
+  <div class="pnl"><div class="ph"><span class="pt">TPM</span><span class="bdg ba">LIVE</span></div><div class="chw"><canvas id="cTpm"></canvas></div></div>
+</div>
+<div class="g2 anim" style="animation-delay:.4s">
+  <div class="pnl"><div class="ph"><span class="pt">Bitcoin (USD)</span><span class="bdg bl">LIVE</span></div><div class="chw"><canvas id="cBtc"></canvas></div></div>
+  <div class="pnl"><div class="ph"><span class="pt">Libra de Cobre (USD)</span><span class="bdg bl">LIVE</span></div><div class="chw"><canvas id="cCob"></canvas></div></div>
+</div>
+</main>
+<footer class="ftr">Observatorio Regional del Maule · <a href="https://mindicador.cl" target="_blank">mindicador.cl</a> · <a href="https://www.bcentral.cl" target="_blank">BCCh</a> · <a href="https://www.ine.gob.cl" target="_blank">INE</a></footer>
+</div>
+
+<!-- ════ MOP ════ -->
+<div class="tc" id="t-mop"><div class="ifw"><div class="ifld" id="ld-mop"><div class="sp"></div>Cargando Proyectos MOP Maule...</div></div></div>
+<!-- ════ SERVIU ════ -->
+<div class="tc" id="t-serviu"><div class="ifw"><div class="ifld" id="ld-serviu"><div class="sp"></div>Cargando SERVIU Maule...</div></div></div>
+<!-- ════ CORFO ════ -->
+<div class="tc" id="t-corfo"><div class="ifw"><div class="ifld" id="ld-corfo"><div class="sp"></div>Cargando Análisis CORFO...</div></div></div>
+
+<script>
+/* ══════ TABS + LAZY IFRAME ══════ */
+const IURLS = {
+  mop: 'https://vlorcap1.github.io/mop_prueba/',
+  serviu: 'https://vlorcap1.github.io/serviu_maule/',
+  corfo: 'https://vlorcap1.github.io/analisis_corfo/#skip-login'
+};
+const iLoaded = {};
+
+function sw(id, btn) {
+  document.querySelectorAll('.mtab').forEach(t => t.classList.remove('act'));
+  document.querySelectorAll('.tc').forEach(t => t.classList.remove('active'));
+  btn.classList.add('act');
+  document.getElementById('t-' + id).classList.add('active');
+  if (IURLS[id] && !iLoaded[id]) {
+    iLoaded[id] = true;
+    const wrap = document.querySelector('#t-' + id + ' .ifw');
+    const ld = document.getElementById('ld-' + id);
+    const ifr = document.createElement('iframe');
+    ifr.src = IURLS[id];
+    ifr.onload = function () {
+      if (ld) ld.classList.add('hid');
+      // CORFO: try to auto-bypass login
+      if (id === 'corfo') {
+        try {
+          const doc = ifr.contentDocument || ifr.contentWindow.document;
+          // Hide any login overlay/modal
+          doc.querySelectorAll('[class*="login"],[id*="login"],[class*="auth"],[class*="modal-backdrop"]').forEach(function(el) { el.style.display = 'none'; });
+          // Show main content
+          doc.querySelectorAll('[class*="dashboard"],[class*="content"],[class*="main"],[class*="app"]').forEach(function(el) {
+            el.style.display = '';
+            el.style.visibility = 'visible';
+            el.style.opacity = '1';
+          });
+          // Remove any body overflow hidden
+          doc.body.style.overflow = 'auto';
+          doc.body.classList.remove('modal-open');
+        } catch (e) { /* cross-origin, can't modify */ }
+      }
+    };
+    ifr.onerror = function () {
+      if (ld) ld.innerHTML = '<div style="color:var(--rose)">⚠️ Error al cargar</div><a href="' + IURLS[id] + '" target="_blank" style="color:var(--blue);font-size:.8rem;margin-top:.5rem">Abrir en nueva pestaña →</a>';
+    };
+    wrap.appendChild(ifr);
+  }
+}
+
+/* ══════ CHART.JS ══════ */
+Chart.defaults.color = '#536080';
+Chart.defaults.borderColor = 'rgba(30,45,74,.35)';
+Chart.defaults.font.family = "'DM Sans',sans-serif";
+Chart.defaults.font.size = 11;
+const CH = {};
+
+/* ══════ API FETCH WITH CORS PROXIES ══════ */
+const API = 'https://mindicador.cl/api';
+const PX = [
+  function(u) { return u; },
+  function(u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); },
+  function(u) { return 'https://corsproxy.io/?' + encodeURIComponent(u); },
+  function(u) { return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u); }
+];
+
+async function apif(url) {
+  for (var i = 0; i < PX.length; i++) {
+    try {
+      var r = await fetch(PX[i](url), { signal: AbortSignal.timeout(12000) });
+      if (!r.ok) continue;
+      var txt = await r.text();
+      if (!txt || txt.length < 20) continue;
+      return JSON.parse(txt);
+    } catch (e) { continue; }
+  }
+  return null;
+}
+
+/* ══════ HELPERS ══════ */
+var fC = function(v) { return '$' + Math.round(v).toLocaleString('es-CL'); };
+var fD = function(v, d) { return v.toFixed(d || 1).replace('.', ','); };
+var fP = function(v) { return fD(v) + '%'; };
+var fMo = function(d) { return new Date(d).toLocaleDateString('es-CL', { month: 'short', year: '2-digit' }); };
+
+function proc(data, n) {
+  if (!data || !data.serie || !data.serie.length) return null;
+  var items = data.serie.slice(0, n || 30).reverse();
+  return { labels: items.map(function(i) { return fMo(i.fecha); }), data: items.map(function(i) { return i.valor; }) };
+}
+
+function mkLine(id, labels, data, o) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (CH[id]) CH[id].destroy();
+  var g = el.getContext('2d').createLinearGradient(0, 0, 0, 195);
+  g.addColorStop(0, (o.color || '#4d8eff') + '28');
+  g.addColorStop(1, (o.color || '#4d8eff') + '02');
+  CH[id] = new Chart(el, {
+    type: 'line',
+    data: { labels: labels, datasets: [{ data: data, borderColor: o.color, backgroundColor: g, borderWidth: 2, fill: true, tension: .35, pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: o.color }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#121a2eee', borderColor: o.color, borderWidth: 1, padding: 8, cornerRadius: 8,
+        callbacks: { label: function(c) { return o.cur ? (o.pre || '$') + c.parsed.y.toLocaleString('es-CL', { maximumFractionDigits: o.dec || 0 }) : c.parsed.y.toFixed(o.dec || 1).replace('.', ',') + (o.suf || ''); } }
+      }},
+      scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 7, maxRotation: 0 } }, y: { grid: { color: 'rgba(30,45,74,.2)' } } }
+    }
+  });
+}
+
+function mkBar(id, labels, data) {
+  var el = document.getElementById(id); if (!el) return;
+  if (CH[id]) CH[id].destroy();
+  CH[id] = new Chart(el, {
+    type: 'bar',
+    data: { labels: labels, datasets: [{ data: data, backgroundColor: data.map(function(v) { return v >= 0 ? '#34d399' : '#fb7185'; }), borderRadius: 4, borderSkipped: false, barPercentage: .6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#121a2eee', padding: 8, cornerRadius: 8, callbacks: { label: function(c) { return c.parsed.y.toFixed(1).replace('.', ',') + '%'; } } } }, scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(30,45,74,.2)' }, ticks: { callback: function(v) { return v + '%'; } } } } }
+  });
+}
+
+function mkDo(id, labels, data, colors) {
+  var el = document.getElementById(id); if (!el) return;
+  if (CH[id]) CH[id].destroy();
+  CH[id] = new Chart(el, {
+    type: 'doughnut',
+    data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderColor: '#121a2e', borderWidth: 2, hoverOffset: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { boxWidth: 10, padding: 7, font: { size: 10.5 }, color: '#8b9bc0' } } } }
+  });
+}
+
+function fall(id, name, key) {
+  var el = document.getElementById(id); if (!el) return;
+  el.style.display = 'none';
+  var parent = el.closest('.chw') || el.parentElement;
+  var d = document.createElement('div');
+  d.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--t3);font-size:.78rem;gap:.5rem;text-align:center';
+  d.innerHTML = '<div style="font-size:1.2rem;opacity:.4">📊</div><div>Sin datos: <b>' + name + '</b></div><button onclick="retry(\'' + id + '\',\'' + key + '\')" style="background:var(--blue);color:#fff;border:none;padding:4px 12px;border-radius:6px;font-size:.7rem;cursor:pointer;font-family:inherit">Reintentar</button><div style="font-size:.58rem;opacity:.5">mindicador.cl/api/' + key + '</div>';
+  parent.appendChild(d);
+}
+
+/* chart configs */
+var CFG = {
+  dolar:    { id: 'cD',   color: '#4d8eff', cur: true, pre: '$', dec: 0, n: 30, name: 'Dólar' },
+  uf:       { id: 'cU',   color: '#22d3ee', cur: true, pre: '$', dec: 0, n: 30, name: 'UF' },
+  ipc:      { id: 'cI',   color: '#fbbf24', cur: false, suf: '%', dec: 1, n: 12, name: 'IPC' },
+  imacec:   { id: 'cM',   color: '#a78bfa', cur: false, suf: '', dec: 1, n: 12, name: 'IMACEC' },
+  tasa_desempleo: { id: 'cDes', color: '#fb7185', cur: false, suf: '%', dec: 1, n: 20, name: 'Desempleo' },
+  tpm:      { id: 'cTpm', color: '#34d399', cur: false, suf: '%', dec: 2, n: 20, name: 'TPM' },
+  bitcoin:  { id: 'cBtc', color: '#fbbf24', cur: true, pre: 'US$', dec: 0, n: 30, name: 'Bitcoin' },
+  libra_cobre: { id: 'cCob', color: '#f97316', cur: true, pre: 'US$', dec: 2, n: 30, name: 'Cobre' }
+};
+
+async function retry(canvasId, key) {
+  var el = document.getElementById(canvasId);
+  var parent = el.closest('.chw') || el.parentElement;
+  var fb = parent.querySelector('div[style*="flex-direction"]');
+  if (fb) fb.remove();
+  el.style.display = 'block';
+  var d = await apif(API + '/' + key);
+  var s = proc(d, CFG[key].n);
+  if (s) mkLine(canvasId, s.labels, s.data, CFG[key]);
+  else fall(canvasId, CFG[key].name, key);
+}
+
+/* ══════ COMUNAS ══════ */
+var COM = {
+  talca: [['Talca','245.347'],['Constitución','52.099'],['Curepto','8.263'],['Empedrado','3.590'],['Maule','16.255'],['Pelarco','7.584'],['Pencahue','7.929'],['Río Claro','12.766'],['San Clemente','40.858'],['San Rafael','7.621']],
+  curico: [['Curicó','155.990'],['Hualañé','8.476'],['Licantén','7.312'],['Molina','47.479'],['Rauco','10.248'],['Romeral','14.218'],['Sagrada Familia','17.148'],['Teno','30.452'],['Vichuquén','3.887']],
+  linares: [['Linares','98.060'],['Colbún','18.021'],['Longaví','28.645'],['Parral','37.822'],['Retiro','16.853'],['San Javier','34.113'],['Villa Alegre','15.487'],['Yerbas Buenas','17.484']],
+  cauquenes: [['Cauquenes','38.230'],['Chanco','7.726'],['Pelluhue','7.190']]
+};
+function prov(btn, p) {
+  document.querySelectorAll('.tabs .tab').forEach(function(t) { t.classList.remove('act'); });
+  btn.classList.add('act');
+  document.getElementById('cGrid').innerHTML = COM[p].map(function(c) { return '<div class="ci"><div>' + c[0] + '</div><div class="cv">' + c[1] + '</div></div>'; }).join('');
+}
+
+
+/* DGA search filter */
+function filterDGA() {
+  var q = document.getElementById('dgaSearch').value.toLowerCase();
+  var rows = document.querySelectorAll('#dgaTable tbody tr');
+  var shown = 0;
+  rows.forEach(function(r) {
+    var txt = r.textContent.toLowerCase();
+    var match = !q || txt.indexOf(q) >= 0;
+    r.style.display = match ? '' : 'none';
+    if (match) shown++;
+  });
+  document.getElementById('dgaCount').textContent = 'Mostrando ' + shown + ' de 361';
+}
+
+/* ══════ INIT ══════ */
+async function init() {
+  prov(document.querySelector('.tabs .tab.act'), 'talca');
+
+  // Static charts
+  mkBar('cPib', ['Q1 23','Q2 23','Q3 23','Q4 23','Q1 24','Q2 24','Q3 24','Q4 24'], [-0.5, -0.8, 1.5, 2.1, 4.6, 0.5, 2.0, 14.2]);
+  
+  // DGA Province doughnut
+  mkDo('cDgaProv', ["Curico", "Linares", "Talca", "Cauquenes"], [100, 112, 130, 19], ['#4d8eff','#34d399','#fbbf24','#a78bfa']);
+  mkDo('cSec', ['Agropecuario','Industria','Comercio','Construcción','EGA','Transporte','Serv. Pers.','Otros'], [22.5,14.2,12.8,8.5,9.1,7.3,8.6,17.0], ['#34d399','#4d8eff','#22d3ee','#fbbf24','#a78bfa','#818cf8','#fb7185','#536080']);
+
+  var ok = 0;
+  // KPI data
+  var all = await apif(API);
+  if (all) {
+    if (all.dolar) { document.getElementById('kD').textContent = fC(all.dolar.valor); document.getElementById('kDc').innerHTML = '<span class="pos">' + new Date(all.dolar.fecha).toLocaleDateString('es-CL') + '</span>'; ok++; }
+    if (all.uf) { document.getElementById('kU').textContent = fC(all.uf.valor); document.getElementById('kUc').innerHTML = '<span class="pos">' + new Date(all.uf.fecha).toLocaleDateString('es-CL') + '</span>'; ok++; }
+    if (all.euro) { document.getElementById('kE').textContent = fC(all.euro.valor); document.getElementById('kEc').innerHTML = '<span class="pos">' + new Date(all.euro.fecha).toLocaleDateString('es-CL') + '</span>'; ok++; }
+    if (all.ipc) { document.getElementById('kI').textContent = fP(all.ipc.valor); document.getElementById('kIc').innerHTML = '<span class="' + (all.ipc.valor >= 0 ? 'pos' : 'neg') + '">' + (all.ipc.valor >= 0 ? '▲' : '▼') + ' Var. mensual</span>'; ok++; }
+    if (all.imacec) { document.getElementById('kM').textContent = fD(all.imacec.valor, 1); document.getElementById('kMc').innerHTML = '<span class="' + (all.imacec.valor >= 0 ? 'pos' : 'neg') + '">' + (all.imacec.valor >= 0 ? '▲' : '▼') + ' Var. mensual</span>'; ok++; }
+  }
+
+  // Historical charts
+  var keys = Object.keys(CFG);
+  var results = await Promise.allSettled(keys.map(function(k) { return apif(API + '/' + k); }));
+  results.forEach(function(res, i) {
+    var k = keys[i], c = CFG[k];
+    if (res.status === 'fulfilled' && res.value) {
+      var s = proc(res.value, c.n);
+      if (s) { mkLine(c.id, s.labels, s.data, c); ok++; return; }
+    }
+    fall(c.id, c.name, k);
+  });
+
+  // Status
+  document.getElementById('sDot').className = ok > 0 ? 'dot' : 'dot err';
+  document.getElementById('sTxt').textContent = ok > 0 ? ok + ' indicadores' : 'Sin conexión';
+  if (ok > 0) document.getElementById('upd').textContent = new Date().toLocaleString('es-CL');
+}
+
+init();
+</script>
+</body>
+</html>
