@@ -131,6 +131,7 @@ canvas{display:block;width:100%!important}
   <button class="mtab" onclick="sw('paes',this)">🎓 PAES Maule <span class="tbdg ex">EXT</span></button>
   <button class="mtab" onclick="sw('mip',this)">📈 MIP Maule <span class="tbdg ex">EXT</span></button>
   <button class="mtab" onclick="sw('sam',this)">💰 SAM Maule <span class="tbdg ex">EXT</span></button>
+  <button class="mtab" onclick="sw('powerbi',this)">📊 Power BI <span class="tbdg ex">EXT</span></button>
 </nav>
 
 <!-- ════ OBSERVATORIO ════ -->
@@ -403,7 +404,9 @@ canvas{display:block;width:100%!important}
 <div class="tc" id="t-mip"><div class="ifw"><div class="ifld" id="ld-mip"><div class="sp"></div>Cargando MIP Maule...</div></div></div>
 <!-- ════ SAM MAULE ════ -->
 <div class="tc" id="t-sam"><div class="ifw"><div class="ifld" id="ld-sam"><div class="sp"></div>Cargando SAM Maule...</div></div></div>
-
+<!-- ════ POWER BI ════ -->
+<div class="tc" id="t-powerbi"><div class="ifw"><div class="ifld" id="ld-powerbi"><div class="sp"></div>Cargando Power BI...</div></div></div>
+  
 <script>
 /* ══════ TABS + LAZY IFRAME ══════ */
 const IURLS = {
@@ -412,7 +415,8 @@ const IURLS = {
   corfo: 'https://vlorcap1.github.io/analisis_corfo/#skip-login',
   paes: 'https://vlorcap1.github.io/paesmaule/',
   mip: 'https://vlorcap1.github.io/mip_maule/',
-  sam: 'https://vlorcap1.github.io/sam_maule/'
+  sam: 'https://vlorcap1.github.io/sam_maule/',
+  powerbi: 'https://app.powerbi.com/view?r=eyJrIjoiOGNhOGEwZDQtMjQ1NC00YmY3LWI3MzYtYWYyNzJlNTMzMjljIiwidCI6ImU3ZDU1MzE2LTQ5M2EtNGRiMi05NzRjLWUwODllZjZjMGZkZSJ9&pageName=d2cff37972c7f96b2245'
 };
 const iLoaded = {};
 
