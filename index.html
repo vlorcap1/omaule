@@ -129,6 +129,7 @@ canvas{display:block;width:100%!important}
   <button class="mtab" onclick="sw('corfo',this)">💼 Análisis CORFO <span class="tbdg ex">EXT</span></button>
   <button class="mtab" onclick="sw('dga',this)">💧 DGA Aguas <span class="tbdg lv">361</span></button>
   <button class="mtab" onclick="sw('paes',this)">🎓 PAES Maule <span class="tbdg ex">EXT</span></button>
+  <button class="mtab" onclick="sw('mip',this)">📈 MIP Maule <span class="tbdg ex">EXT</span></button>
 </nav>
 
 <!-- ════ OBSERVATORIO ════ -->
@@ -397,6 +398,8 @@ canvas{display:block;width:100%!important}
 <div class="tc" id="t-corfo"><div class="ifw"><div class="ifld" id="ld-corfo"><div class="sp"></div>Cargando Análisis CORFO...</div></div></div>
 <!-- = PAES MAULE = -->
 <div class="tc" id="t-paes"><div class="ifw"><div class="ifld" id="ld-paes"><div class="sp"></div>Cargando PAES Maule...</div></div></div>
+<!-- ════ MIP MAULE ════ -->
+<div class="tc" id="t-mip"><div class="ifw"><div class="ifld" id="ld-mip"><div class="sp"></div>Cargando MIP Maule...</div></div></div>
   
 <script>
 /* ══════ TABS + LAZY IFRAME ══════ */
@@ -404,7 +407,8 @@ const IURLS = {
   mop: 'https://vlorcap1.github.io/mop_prueba/',
   serviu: 'https://vlorcap1.github.io/serviu_maule/',
   corfo: 'https://vlorcap1.github.io/analisis_corfo/#skip-login',
-  paes: 'https://vlorcap1.github.io/paesmaule/'
+  paes: 'https://vlorcap1.github.io/paesmaule/',
+  mip: 'https://vlorcap1.github.io/mip_maule/'
 };
 const iLoaded = {};
 
